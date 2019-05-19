@@ -6,21 +6,26 @@
 #include <PS2Keyboard.h>
 
 // Which pin on the Arduino is connected to the NeoPixels?
-#define PIN 10 
+#define PIN 6 
 
 // How many NeoPixels are attached to the Arduino?
-#define NUMPIXELS 600
+#define NUMPIXELS 660 
 
 // How many pixels to light
 int lightUp = 0;
+int i = 0;
 
 // Variable for start and end value
 int start = 0;
 int ended = 0;
 
+int encoded = 0;
+
 // Variable to store steps triggered
 int currentStep = 0;
 int nextStep = 1;
+
+unsigned long StartTime = 0;
 
 // Pins for keyboard
 const int DataPin = 8;
@@ -45,7 +50,6 @@ int sensorPin12 = A11;
 int sensorPin13 = A12;
 int sensorPin14 = A13;
 
-
 // Declaire variable to store LDR input
 int sensorValue1 = 0;
 int sensorValue2 = 0;
@@ -63,7 +67,7 @@ int sensorValue13 = 0;
 int sensorValue14 = 0; 
 
 // Declaire LDR value for laser (when above, laser is on it, when below, laser interrupted)
-int sensorLimit = 1020;
+int sensorLimit = 970;
 
 // Declaire keybaord to be used
 PS2Keyboard keyboard;
@@ -87,6 +91,9 @@ void setup() {
   lcd.begin(16, 2); // set up the LCD's number of columns and rows:
 
   lcd.write("Type a message:");
+
+  pixels.clear();
+  pixels.show();
 }
 
 void loop() {
@@ -106,45 +113,11 @@ void loop() {
   sensorValue12 = analogRead(sensorPin12);
   sensorValue13 = analogRead(sensorPin13);
   sensorValue14 = analogRead(sensorPin14);
-  delay(60);
-
-  if (currentStep == nextStep) {
-    lightUp = lightUp + 50;
-    nextStep++;
-  } 
+  delay(100);
   
-  if (sensorValue1 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 1;
-    start = 0;
-  } else if (sensorValue2 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 2;
-  } else if (sensorValue3 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 3;
-  } else if (sensorValue4 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 4;
-  } else if (sensorValue5 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 5;
-  } else if (sensorValue6 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 6;
-  } else if (sensorValue7 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 7;
-  } else if (sensorValue8 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 8;
-  } else if (sensorValue9 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 9;
-  } else if (sensorValue10 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 10;
-  } else if (sensorValue11 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 11;
-  } else if (sensorValue12 < sensorLimit && currentStep == nextStep - 1){
-    currentStep = 12;
-    nextStep = 0;
-  } else if (currentStep != 0 && currentStep != 12){
-    noise();
-    delay(1500);
-  }
-    
-  lights();
+//Serial.println(sensorValue4);
+//  Serial.println(currentStep);
+//  delay(10);
 
   // If statements to encode and start session
 
@@ -152,7 +125,7 @@ void loop() {
       keyboardLCD();
     }
 
-   if (sensorValue13 < 200) {
+   if (sensorValue13 < 500) {
       start = 1;
     }
 
@@ -161,7 +134,60 @@ void loop() {
     encodeMessage();
   } 
 
-  if (sensorValue14 < 200) {
+  Serial.println(sensorValue2);
+  
+   if (currentStep == nextStep && currentStep == 7 && encoded == 1){
+      nextStep++;
+   } else if ( currentStep == nextStep && encoded == 1) {
+    lightUp = lightUp + 54;
+      nextStep++;
+   } else if (currentStep == nextStep - 1 || currentStep == nextStep+1 ){
+      nextStep = currentStep + 1;
+   } else if (currentStep == 8) {
+    nextStep = 9;
+   } else if (currentStep == 9) {
+    nextStep = 10;
+   } else if (currentStep == 10) {
+    nextStep = 11;
+   } else if (currentStep == 11) {
+    nextStep = 12;
+   }
+  
+  if (sensorValue1 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 1;
+    start = 0;
+  } else if (sensorValue2 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 2;
+  } else if (sensorValue3 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 3;
+  } else if (sensorValue4 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 4;
+  } else if (sensorValue5 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 5;
+  } else if (sensorValue6 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 6;
+  } else if (sensorValue7 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 7;
+    lightUp = lightUp + 120;
+  } else if (sensorValue8 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 8;
+  } else if (sensorValue9 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 9;
+  } else if (sensorValue10 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 10;
+  } else if (sensorValue11 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 11;
+  } else if (sensorValue12 < sensorLimit && currentStep == nextStep - 1 && encoded == 1){
+    currentStep = 12;
+    nextStep = 0;
+  } else if (currentStep != 0 && currentStep != 12 && encoded == 1){
+    noise();
+  }
+    
+  lights();
+
+  
+  if (sensorValue14 < 500) {
     ended = 1;
   }
 
@@ -173,8 +199,11 @@ void loop() {
     input = "";
     currentStep = 0;
     nextStep = 1;
+    encoded = 0;
     pixels.clear();
     pixels.show();
+    lcd.clear();
+    lcd.write("Type a message:");
   }
   
 }
@@ -207,7 +236,7 @@ void keyboardLCD() {
 
 void lights(){
 
-  for(int i=0; i<lightUp; i++) { // For each pixel... = i+4
+  for(i; i<lightUp; i++) { // For each pixel... = i+4
     
     // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255
     pixels.setPixelColor(i, pixels.Color(100, 100, 100));
@@ -216,13 +245,15 @@ void lights(){
     pixels.show();
 
     }
+
+   i = lightUp;
 }
 
 void lightStart(){
     pixels.clear();
     pixels.show();
 
-    for(int i=0; i<10; i++) { // For each pixel... = i+4
+    for(int i=0; i<16; i++) { // For each pixel... = i+4
     
     // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255
     pixels.setPixelColor(i, pixels.Color(100, 100, 100));
@@ -232,7 +263,7 @@ void lightStart(){
 
     }
 
-   delay(1500);
+   delay(50);
 }
 
 void noise(){
@@ -242,6 +273,8 @@ void noise(){
   char r = weirdText.charAt(random(0,20));
   
   input.setCharAt(random(0,16), r);
+
+//  delay(15);
   
 }
 
@@ -252,6 +285,8 @@ void encodeMessage(){
   lcd.write("Message encoded!");
   lcd.setCursor(0, 1);
   lcd.write("Sending message...");
+
+  encoded = 1;
 }
 
 void decodeMessage(){
